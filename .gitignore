@@ -1,28 +1,40 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+import telegram
+from telegram.ext import Updater, CommandHandler, JobQueue
+import requests
 
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
+# توكن البوت
+TOKEN = "8588157408:AAH2LSUZRj5Rpv6drs7OcFIlQn-kPvc_MuA"
 
-# Environment files
-/.env
+# يوزر القناة مالتك
+CHAT_ID = "@JineGamer"
 
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
+updater = Updater(TOKEN, use_context=True)
+dp = updater.dispatcher
+jq = updater.job_queue
 
-# TypeScript cache
-*.tsbuildinfo
+# أمر /start
+def start(update, context):
+    update.message.reply_text("هلا عثو 🙌 البوت شغال وجاهز لإشعارات الذهب 🔔")
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# أمر /gold – يرجع سعر الذهب الحالي (مؤقت)
+def gold(update, context):
+    price = "195,200 IQD/g"  # لاحقاً نربطه بسعر مباشر
+    update.message.reply_text(f"سعر الذهب الآن: {price}")
+
+# إرسال إشارة تلقائية كل فترة
+def signal_job(context):
+    context.bot.send_message(
+        chat_id=CHAT_ID,
+        text="إشارة شراء الذهب 💰\nالتحليل: EMA + RSI"
+    )
+
+# ربط الأوامر
+dp.add_handler(CommandHandler("start", start))
+dp.add_handler(CommandHandler("gold", gold))
+
+# تشغيل الإشارات كل 30 دقيقة
+jq.run_repeating(signal_job, interval=1800, first=10)
+
+# بدء البوت
+updater.start_polling()
+updater.idle()
